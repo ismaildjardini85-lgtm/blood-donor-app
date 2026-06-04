@@ -1,6 +1,32 @@
-// حفظ وعرض بيانات المتبرعين محلياً
-let donors = JSON.parse(localStorage.getItem('donors') || '[]');
+// حفظ وعرض بيانات المتبرعين - مع Firebase و localStorage
+let donors = [];
 let filteredDonors = donors.slice();
+const db = firebase.database();
+const donorsRef = db.ref('donors');
+
+// تحميل البيانات من Firebase عند بدء التطبيق
+function loadDonorsFromFirebase() {
+  donorsRef.on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      donors = Array.isArray(data) ? data : Object.values(data);
+    } else {
+      // إذا لم توجد بيانات في Firebase، حمّل من localStorage
+      donors = JSON.parse(localStorage.getItem('donors') || '[]');
+    }
+    filteredDonors = donors.slice();
+    renderTable();
+  });
+}
+
+// دالة لحفظ البيانات في Firebase و localStorage
+function saveDonors() {
+  localStorage.setItem('donors', JSON.stringify(donors));
+  donorsRef.set(donors).catch(err => {
+    console.warn('تعذر الحفظ في Firebase:', err);
+    // البيانات محفوظة في localStorage على الأقل
+  });
+}
 
 function renderTable() {
   const tbody = document.querySelector('#donorsTable tbody');
@@ -25,7 +51,7 @@ function renderTable() {
     btn.onclick = function() {
       const idx = parseInt(this.getAttribute('data-idx'));
       donors.splice(idx, 1);
-      localStorage.setItem('donors', JSON.stringify(donors));
+      saveDonors();
       filteredDonors = donors.slice();
       renderTable();
     };
@@ -45,7 +71,7 @@ document.getElementById('donorForm').onsubmit = function(e) {
     patient: document.getElementById('patient').value
   };
   donors.push(donor);
-  localStorage.setItem('donors', JSON.stringify(donors));
+  saveDonors();
   filteredDonors = donors.slice();
   renderTable();
   this.reset();
@@ -68,9 +94,6 @@ document.getElementById('searchInput').oninput = function() {
   }
   renderTable();
 };
-
-filteredDonors = donors.slice();
-renderTable();
 
 // إحصائيات التبرع
 function getStats(donors) {
@@ -201,7 +224,7 @@ function importData() {
         } else {
           donors = donors.concat(imported);
         }
-        localStorage.setItem('donors', JSON.stringify(donors));
+        saveDonors();
         filteredDonors = donors.slice();
         renderTable();
         alert('تم استيراد البيانات بنجاح!');
@@ -218,9 +241,14 @@ function importData() {
 function clearAllData() {
   if (confirm('هل أنت متأكد من حذف جميع البيانات؟ هذا الإجراء لا يمكن التراجع عنه!')) {
     donors = [];
-    localStorage.setItem('donors', JSON.stringify(donors));
+    saveDonors();
     filteredDonors = donors.slice();
     renderTable();
     alert('تم حذف جميع البيانات');
   }
 }
+
+// تحميل البيانات عند بدء التطبيق
+document.addEventListener('DOMContentLoaded', function() {
+  loadDonorsFromFirebase();
+});
