@@ -1,45 +1,50 @@
-// حفظ وعرض بيانات المتبرعين - محلي + سحابي
-let donors = JSON.parse(localStorage.getItem('donors') || '[]');
+// حفظ وعرض بيانات المتبرعين - مع JSON Server
+let donors = [];
 let filteredDonors = donors.slice();
+let isOnline = false;
 
-// محاولة استخدام Firebase إذا كان متاحاً
-let useFirebase = false;
-let db, donorsRef;
-
-try {
-  if (typeof firebase !== 'undefined' && firebase.database) {
-    db = firebase.database();
-    donorsRef = db.ref('donors');
-    useFirebase = true;
-    // تحميل من Firebase إذا كانت البيانات متاحة
-    donorsRef.on('value', (snapshot) => {
-      const data = snapshot.val();
-      if (data && Object.keys(data).length > 0) {
-        donors = Array.isArray(data) ? data : Object.values(data);
-        localStorage.setItem('donors', JSON.stringify(donors));
-        filteredDonors = donors.slice();
-        renderTable();
-      }
-    });
+// تحميل البيانات من الخادم عند بدء التطبيق
+async function loadDonorsFromServer() {
+  try {
+    const response = await fetch(API_URL);
+    if (response.ok) {
+      donors = await response.json();
+      isOnline = true;
+      console.log('✓ تم تحميل البيانات من الخادم');
+    } else {
+      throw new Error('فشل تحميل البيانات');
+    }
+  } catch (error) {
+    console.log('⚠️ الخادم غير متاح، استخدام البيانات المحلية');
+    donors = JSON.parse(localStorage.getItem('donors') || '[]');
+    isOnline = false;
   }
-} catch(e) {
-  console.log('Firebase غير متاح، استخدام localStorage');
-  useFirebase = false;
+  filteredDonors = donors.slice();
+  renderTable();
 }
 
-// دالة لحفظ البيانات
-function saveDonors() {
-  // حفظ دائماً في localStorage
+// دالة لحفظ البيانات في الخادم و localStorage
+async function saveDonors() {
+  // حفظ في localStorage أولاً
   localStorage.setItem('donors', JSON.stringify(donors));
   
-  // محاولة الحفظ في Firebase إذا كانت متاحة
-  if (useFirebase && donorsRef) {
+  // محاولة الحفظ في الخادم
+  if (isOnline) {
     try {
-      donorsRef.set(donors).catch(err => {
-        console.log('تعذر الحفظ في Firebase:', err);
-      });
-    } catch(e) {
-      console.log('Firebase error:', e);
+      // حذف البيانات القديمة أولاً
+      await fetch(API_URL, { method: 'DELETE' }).catch(() => {});
+      
+      // إضافة كل متبرع بشكل منفصل
+      for (let donor of donors) {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(donor)
+        });
+      }
+      console.log('✓ تم الحفظ في الخادم');
+    } catch (error) {
+      console.warn('⚠️ خطأ في الحفظ:', error);
     }
   }
 }
@@ -266,6 +271,5 @@ function clearAllData() {
 
 // تحميل البيانات عند بدء التطبيق
 document.addEventListener('DOMContentLoaded', function() {
-  filteredDonors = donors.slice();
-  renderTable();
+  loadDonorsFromServer();
 });

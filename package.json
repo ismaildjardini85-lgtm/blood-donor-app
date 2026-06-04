@@ -1,9 +1,12 @@
 {
-  "name": "electron-app",
+  "name": "blood-donor-app",
   "version": "1.0.0",
-  "description": "هذا المجلد سيحتوي على تطبيق سطح المكتب (exe) باستخدام Electron مع React وNode.js.",
+  "description": "تطبيق إدارة متبرعي الدم - Blood Donor Management System",
   "main": "index.js",
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "scripts": {
+    "server": "json-server --watch db.json --port 3000"
+  }
 }

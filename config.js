@@ -1,13 +1,12 @@
-// إعدادات Firebase - تم إنشاؤها تلقائياً
-const firebaseConfig = {
-  apiKey: "AIzaSyAIXVqlL4zfzf_placeholder_key",
-  authDomain: "blood-donor-app-demo.firebaseapp.com",
-  databaseURL: "https://blood-donor-app-demo-default-rtdb.firebaseio.com",
-  projectId: "blood-donor-app-demo",
-  storageBucket: "blood-donor-app-demo.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abc123def456"
-};
+// إعدادات قاعدة البيانات
+const API_URL = 'http://localhost:3000/donors';
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+// دالة للتحقق من الاتصال بالخادم
+async function checkConnection() {
+  try {
+    const response = await fetch(API_URL);
+    return response.ok;
+  } catch (e) {
+    return false;
+  }
+}
