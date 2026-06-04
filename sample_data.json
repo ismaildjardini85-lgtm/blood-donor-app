@@ -1,0 +1,52 @@
+[
+  {
+    "bagNumber": "BAG001",
+    "name": "أحمد محمد",
+    "birthDate": "1985-05-15",
+    "phone": "0561234567",
+    "address": "عين الصفراء، الجزائر",
+    "donationDate": "2026-01-10",
+    "bloodType": "O+",
+    "patient": "مريض 1"
+  },
+  {
+    "bagNumber": "BAG002",
+    "name": "فاطمة علي",
+    "birthDate": "1990-08-22",
+    "phone": "0562345678",
+    "address": "عين الصفراء، الجزائر",
+    "donationDate": "2026-01-15",
+    "bloodType": "A+",
+    "patient": "مريض 2"
+  },
+  {
+    "bagNumber": "BAG003",
+    "name": "محمد الحسن",
+    "birthDate": "1988-03-10",
+    "phone": "0563456789",
+    "address": "عين الصفراء، الجزائر",
+    "donationDate": "2026-02-05",
+    "bloodType": "B+",
+    "patient": "مريض 3"
+  },
+  {
+    "bagNumber": "BAG004",
+    "name": "خديجة سارة",
+    "birthDate": "1992-11-28",
+    "phone": "0564567890",
+    "address": "عين الصفراء، الجزائر",
+    "donationDate": "2026-02-20",
+    "bloodType": "AB+",
+    "patient": ""
+  },
+  {
+    "bagNumber": "BAG005",
+    "name": "علي عمر",
+    "birthDate": "1987-07-14",
+    "phone": "0565678901",
+    "address": "عين الصفراء، الجزائر",
+    "donationDate": "2026-03-01",
+    "bloodType": "O-",
+    "patient": "مريض 4"
+  }
+]

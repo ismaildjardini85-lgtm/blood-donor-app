@@ -1,0 +1,9 @@
+{
+  "name": "electron-app",
+  "version": "1.0.0",
+  "description": "هذا المجلد سيحتوي على تطبيق سطح المكتب (exe) باستخدام Electron مع React وNode.js.",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
