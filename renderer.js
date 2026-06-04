@@ -1,31 +1,47 @@
-// حفظ وعرض بيانات المتبرعين - مع Firebase و localStorage
-let donors = [];
+// حفظ وعرض بيانات المتبرعين - محلي + سحابي
+let donors = JSON.parse(localStorage.getItem('donors') || '[]');
 let filteredDonors = donors.slice();
-const db = firebase.database();
-const donorsRef = db.ref('donors');
 
-// تحميل البيانات من Firebase عند بدء التطبيق
-function loadDonorsFromFirebase() {
-  donorsRef.on('value', (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-      donors = Array.isArray(data) ? data : Object.values(data);
-    } else {
-      // إذا لم توجد بيانات في Firebase، حمّل من localStorage
-      donors = JSON.parse(localStorage.getItem('donors') || '[]');
-    }
-    filteredDonors = donors.slice();
-    renderTable();
-  });
+// محاولة استخدام Firebase إذا كان متاحاً
+let useFirebase = false;
+let db, donorsRef;
+
+try {
+  if (typeof firebase !== 'undefined' && firebase.database) {
+    db = firebase.database();
+    donorsRef = db.ref('donors');
+    useFirebase = true;
+    // تحميل من Firebase إذا كانت البيانات متاحة
+    donorsRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data && Object.keys(data).length > 0) {
+        donors = Array.isArray(data) ? data : Object.values(data);
+        localStorage.setItem('donors', JSON.stringify(donors));
+        filteredDonors = donors.slice();
+        renderTable();
+      }
+    });
+  }
+} catch(e) {
+  console.log('Firebase غير متاح، استخدام localStorage');
+  useFirebase = false;
 }
 
-// دالة لحفظ البيانات في Firebase و localStorage
+// دالة لحفظ البيانات
 function saveDonors() {
+  // حفظ دائماً في localStorage
   localStorage.setItem('donors', JSON.stringify(donors));
-  donorsRef.set(donors).catch(err => {
-    console.warn('تعذر الحفظ في Firebase:', err);
-    // البيانات محفوظة في localStorage على الأقل
-  });
+  
+  // محاولة الحفظ في Firebase إذا كانت متاحة
+  if (useFirebase && donorsRef) {
+    try {
+      donorsRef.set(donors).catch(err => {
+        console.log('تعذر الحفظ في Firebase:', err);
+      });
+    } catch(e) {
+      console.log('Firebase error:', e);
+    }
+  }
 }
 
 function renderTable() {
@@ -250,5 +266,6 @@ function clearAllData() {
 
 // تحميل البيانات عند بدء التطبيق
 document.addEventListener('DOMContentLoaded', function() {
-  loadDonorsFromFirebase();
+  filteredDonors = donors.slice();
+  renderTable();
 });
