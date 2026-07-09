@@ -4,6 +4,39 @@ let filteredDonors = donors.slice();
 let isOnline = false;
 const STORAGE_KEY = 'blood-donor-app.donors';
 
+function normalizeDonorsForStorage(data) {
+  if (!Array.isArray(data)) {
+    return [];
+  }
+  return data.filter((item) => item && typeof item === 'object' && !Array.isArray(item));
+}
+
+function encodeDonorsForUrl(donorsList) {
+  const payload = JSON.stringify(normalizeDonorsForStorage(donorsList));
+  try {
+    return btoa(encodeURIComponent(payload));
+  } catch (error) {
+    return encodeURIComponent(payload);
+  }
+}
+
+function decodeDonorsFromUrl(value) {
+  if (!value) {
+    return [];
+  }
+
+  try {
+    const decoded = atob(value);
+    return normalizeDonorsForStorage(JSON.parse(decodeURIComponent(decoded)));
+  } catch (error) {
+    try {
+      return normalizeDonorsForStorage(JSON.parse(decodeURIComponent(value)));
+    } catch (innerError) {
+      return [];
+    }
+  }
+}
+
 function getUrlParam(name) {
   const params = new URLSearchParams(window.location.search);
   return params.get(name);
@@ -23,7 +56,7 @@ function updateShareUrl() {
 
 function restoreFromUrlOrLocalStorage() {
   const sharedDonors = decodeDonorsFromUrl(getUrlParam('data'));
-  const localDonors = readLocalDonors();
+  const localDonors = readStoredDonors();
   if (sharedDonors.length > 0) {
     donors = sharedDonors;
     persistLocalDonors();
@@ -39,17 +72,37 @@ function restoreFromUrlOrLocalStorage() {
   return false;
 }
 
-function readLocalDonors() {
-  try {
-    const value = localStorage.getItem(STORAGE_KEY);
-    return value ? JSON.parse(value) : [];
-  } catch (error) {
-    return [];
+function readStoredDonors() {
+  const sources = [localStorage, sessionStorage];
+  for (const storage of sources) {
+    try {
+      const value = storage && storage.getItem(STORAGE_KEY);
+      if (value) {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) {
+          return normalizeDonorsForStorage(parsed);
+        }
+      }
+    } catch (error) {
+      continue;
+    }
   }
+  return [];
 }
 
 function persistLocalDonors() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(donors));
+  const payload = JSON.stringify(normalizeDonorsForStorage(donors));
+  try {
+    localStorage.setItem(STORAGE_KEY, payload);
+  } catch (error) {
+    // ignore storage errors
+  }
+
+  try {
+    sessionStorage.setItem(STORAGE_KEY, payload);
+  } catch (error) {
+    // ignore storage errors
+  }
 }
 
 async function copyCurrentShareLink() {
