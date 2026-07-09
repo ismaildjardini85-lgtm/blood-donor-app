@@ -69,6 +69,9 @@
         <label>Patient: <input type="text" id="patient"></label>
         <button type="submit">Ajouter Donneur</button>
       </form>
+      <div style="margin: 16px 0; padding: 10px; border: 1px solid #c8e6c9; background: #f1f8e9; color: #2e7d32; border-radius: 6px; font-size: 0.95em;">
+        💾 هذه البيانات تُخزَّن على خادم مشترك ومتاح للجميع عبر GitHub عند تشغيل النسخة المعرّفة على الخادم.
+      </div>
       <div style="margin: 24px 0 0 0;">
         <input type="text" id="searchInput" placeholder="Rechercher par nom, groupe sanguin, numéro du sac, téléphone..." style="width:100%;padding:8px;border-radius:5px;border:1px solid #ccc;font-size:1em;">
         <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
@@ -107,6 +110,9 @@
       </div>
     </div>
     <!-- API Configuration -->
+    <script>
+      window.BLOOD_DONOR_API_URL = window.BLOOD_DONOR_API_URL || window.API_URL || new URLSearchParams(window.location.search).get('api');
+    </script>
     <script src="config.js"></script>
     <script src="renderer.js"></script>
   </body>

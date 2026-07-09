@@ -10,13 +10,33 @@
 ### 1. اختبار التطبيق محلياً
 افتح `index.html` مباشرة في المتصفح أو استخدم خادم محلي (انظر TEST.md)
 
-### 2. النشر على الإنترنت
+### 2. حفظ البيانات على GitHub بشكل عام ومشترك
+لجعل التطبيق يحفظ البيانات مباشرة في ملف JSON داخل مستودع GitHub بشكل عام مع مشاركة بين الزملاء:
+
+```powershell
+$env:GITHUB_REPO="YOUR_USERNAME/YOUR_REPO"
+$env:GITHUB_TOKEN="ghp_your_token"
+$env:GITHUB_FILE_PATH="db.json"
+npm run server
+```
+
+إذا لم يتم تعيين الرموز، سيحفظ التطبيق البيانات في ملف `db.json` المحلي داخل المشروع. ولجعلها عامة ومشتركة، استخدم مستودع GitHub عام وأضف المتغيرات البيئية في مزوّد الاستضافة (مثل Render أو Railway).
+
+### 3. النشر على الإنترنت
 **أسهل طريقة - Netlify (3 دقائق فقط):**
 1. اذهب إلى https://netlify.com
 2. اسحب مجلد `extracted_app`
 3. احصل على رابطك الخاص
 
 📖 للتفاصيل، انظر `NETLIFY_QUICK.md`
+
+### 4. الرابط القابل للمشاركة
+بعد نشر الخادم المشترك، استخدم الرابط التالي مع عنوان الخادم:
+
+https://ismaildjardini85-lgtm.github.io/blood-donor-app/?api=https://YOUR_BACKEND_URL
+
+مثال:
+https://ismaildjardini85-lgtm.github.io/blood-donor-app/?api=https://blood-donor-app.onrender.com
 
 ---
 

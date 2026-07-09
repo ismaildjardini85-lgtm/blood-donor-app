@@ -1,4 +1,4 @@
-// حفظ وعرض بيانات المتبرعين - مع JSON Server
+// حفظ وعرض بيانات المتبرعين - مع تخزين مشترك عبر الخادم
 let donors = [];
 let filteredDonors = donors.slice();
 let isOnline = false;
@@ -8,44 +8,44 @@ async function loadDonorsFromServer() {
   try {
     const response = await fetch(API_URL);
     if (response.ok) {
-      donors = await response.json();
+      const data = await response.json();
+      donors = Array.isArray(data) ? data : [];
       isOnline = true;
       console.log('✓ تم تحميل البيانات من الخادم');
     } else {
       throw new Error('فشل تحميل البيانات');
     }
   } catch (error) {
-    console.log('⚠️ الخادم غير متاح، استخدام البيانات المحلية');
-    donors = JSON.parse(localStorage.getItem('donors') || '[]');
+    console.warn('⚠️ الخادم غير متاح أو غير مُعدّ بعد، سيتم البدء من قائمة فارغة');
+    donors = [];
     isOnline = false;
   }
   filteredDonors = donors.slice();
   renderTable();
 }
 
-// دالة لحفظ البيانات في الخادم و localStorage
+// دالة لحفظ البيانات في الخادم المشترك
 async function saveDonors() {
-  // حفظ في localStorage أولاً
-  localStorage.setItem('donors', JSON.stringify(donors));
-  
-  // محاولة الحفظ في الخادم
-  if (isOnline) {
-    try {
-      // حذف البيانات القديمة أولاً
-      await fetch(API_URL, { method: 'DELETE' }).catch(() => {});
-      
-      // إضافة كل متبرع بشكل منفصل
-      for (let donor of donors) {
-        await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(donor)
-        });
-      }
-      console.log('✓ تم الحفظ في الخادم');
-    } catch (error) {
-      console.warn('⚠️ خطأ في الحفظ:', error);
+  try {
+    const response = await fetch(API_URL, { method: 'GET' });
+    if (!response.ok) {
+      throw new Error('الخادم غير متاح');
     }
+    isOnline = true;
+
+    await fetch(API_URL, { method: 'DELETE' }).catch(() => {});
+
+    for (let donor of donors) {
+      await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(donor)
+      });
+    }
+    console.log('✓ تم الحفظ في الخادم المشترك');
+  } catch (error) {
+    isOnline = false;
+    console.warn('⚠️ خطأ في الحفظ:', error);
   }
 }
 

@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: blood-donor-app
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run server
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: GITHUB_REPO
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: GITHUB_FILE_PATH
+        value: db.json
