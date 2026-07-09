@@ -33,10 +33,9 @@ npm run server
 ### 4. الرابط القابل للمشاركة
 بعد نشر الخادم المشترك، استخدم الرابط التالي مع عنوان الخادم:
 
-https://ismaildjardini85-lgtm.github.io/blood-donor-app/?api=https://YOUR_BACKEND_URL
+https://ismaildjardini85-lgtm.github.io/blood-donor-app/?api=https://quick-swans-open.loca.lt
 
-مثال:
-https://ismaildjardini85-lgtm.github.io/blood-donor-app/?api=https://blood-donor-app.onrender.com
+هذا الرابط يعمل الآن مع الخادم المشترك الحالي.
 
 ---
 
