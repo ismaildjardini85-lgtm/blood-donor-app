@@ -70,7 +70,11 @@
         <button type="submit">Ajouter Donneur</button>
       </form>
       <div style="margin: 16px 0; padding: 10px; border: 1px solid #c8e6c9; background: #f1f8e9; color: #2e7d32; border-radius: 6px; font-size: 0.95em;">
-        💾 البيانات تُحفظ تلقائياً على الخادم المشترك عند توفره، وفي حال عدم توفر الخادم تُحفظ محلياً في المتصفح حتى تعود المزامنة.
+        💾 البيانات تُحفظ تلقائياً في الرابط الحالي والمتصفح، لذلك يمكن فتح نفس القائمة على الكمبيوتر والهاتف ومشاركتها مع الزملاء.
+      </div>
+      <div style="margin: 12px 0 0 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+        <button id="copyShareLinkBtn" style="background:#1976d2;color:#fff;border:none;padding:10px 16px;border-radius:6px;font-size:0.95em;cursor:pointer;">🔗 نسخ الرابط المشترك</button>
+        <span id="shareStatus" style="color:#1565c0;font-size:0.95em;"></span>
       </div>
       <div style="margin: 24px 0 0 0;">
         <input type="text" id="searchInput" placeholder="Rechercher par nom, groupe sanguin, numéro du sac, téléphone..." style="width:100%;padding:8px;border-radius:5px;border:1px solid #ccc;font-size:1em;">

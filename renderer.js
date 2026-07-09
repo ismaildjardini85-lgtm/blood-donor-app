@@ -21,6 +21,24 @@ function updateShareUrl() {
   window.history.replaceState({}, '', nextUrl);
 }
 
+function restoreFromUrlOrLocalStorage() {
+  const sharedDonors = decodeDonorsFromUrl(getUrlParam('data'));
+  const localDonors = readLocalDonors();
+  if (sharedDonors.length > 0) {
+    donors = sharedDonors;
+    persistLocalDonors();
+    return true;
+  }
+
+  if (localDonors.length > 0) {
+    donors = localDonors;
+    return true;
+  }
+
+  donors = [];
+  return false;
+}
+
 function readLocalDonors() {
   try {
     const value = localStorage.getItem(STORAGE_KEY);
@@ -34,11 +52,34 @@ function persistLocalDonors() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(donors));
 }
 
+async function copyCurrentShareLink() {
+  const shareStatus = document.getElementById('shareStatus');
+  const shareUrl = window.location.href;
+
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(shareUrl);
+    } else {
+      const tempInput = document.createElement('input');
+      tempInput.value = shareUrl;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+    }
+    if (shareStatus) {
+      shareStatus.textContent = 'تم نسخ الرابط المشترك بنجاح';
+    }
+  } catch (error) {
+    if (shareStatus) {
+      shareStatus.textContent = 'تعذر نسخ الرابط تلقائياً';
+    }
+  }
+}
+
 // تحميل البيانات من الخادم عند بدء التطبيق، مع حفظ محلي كنسخة احتياطية
 async function loadDonorsFromServer() {
-  const sharedDonors = decodeDonorsFromUrl(getUrlParam('data'));
-  const localDonors = readLocalDonors();
-  donors = sharedDonors.length > 0 ? sharedDonors : (Array.isArray(localDonors) ? localDonors : []);
+  restoreFromUrlOrLocalStorage();
 
   try {
     const response = await fetch(API_URL);
@@ -120,6 +161,8 @@ function renderTable() {
     };
   });
 }
+
+document.getElementById('copyShareLinkBtn')?.addEventListener('click', copyCurrentShareLink);
 
 document.getElementById('donorForm').onsubmit = function(e) {
   e.preventDefault();
