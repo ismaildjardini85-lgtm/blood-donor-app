@@ -17,6 +17,32 @@ function mergeDonors(localDonors, remoteDonors) {
   return normalizeDonors(localDonors);
 }
 
+function encodeDonorsForUrl(donors) {
+  const payload = JSON.stringify(normalizeDonors(donors));
+  if (typeof Buffer !== 'undefined') {
+    return Buffer.from(payload, 'utf8').toString('base64');
+  }
+  return btoa(unescape(encodeURIComponent(payload)));
+}
+
+function decodeDonorsFromUrl(value) {
+  if (!value) {
+    return [];
+  }
+
+  try {
+    let payload = value;
+    if (typeof Buffer !== 'undefined') {
+      payload = Buffer.from(value, 'base64').toString('utf8');
+    } else {
+      payload = decodeURIComponent(escape(atob(value)));
+    }
+    return normalizeDonors(JSON.parse(payload));
+  } catch (error) {
+    return [];
+  }
+}
+
 function buildFilePayload(donors) {
   return JSON.stringify({ donors: normalizeDonors(donors) }, null, 2);
 }
@@ -101,6 +127,8 @@ async function syncToGitHub(donors, options = {}) {
 
 module.exports = {
   buildFilePayload,
+  decodeDonorsFromUrl,
+  encodeDonorsForUrl,
   getStoragePath,
   mergeDonors,
   normalizeDonors,

@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { buildFilePayload, mergeDonors, normalizeDonors } = require('../github-storage');
+const { buildFilePayload, decodeDonorsFromUrl, encodeDonorsForUrl, mergeDonors, normalizeDonors } = require('../github-storage');
 
 test('buildFilePayload wraps donors in the expected JSON structure', () => {
   const payload = buildFilePayload([{ name: 'Ali' }, { name: 'Sara' }]);
@@ -20,4 +20,11 @@ test('mergeDonors prefers remote data and falls back to local data when needed',
 
   const fallback = mergeDonors([{ name: 'Local' }], []);
   assert.deepStrictEqual(fallback, [{ name: 'Local' }]);
+});
+
+test('encode and decode donors for sharable URLs', () => {
+  const donors = [{ name: 'Ali', bloodType: 'O+' }];
+  const encoded = encodeDonorsForUrl(donors);
+  const decoded = decodeDonorsFromUrl(encoded);
+  assert.deepStrictEqual(decoded, donors);
 });
