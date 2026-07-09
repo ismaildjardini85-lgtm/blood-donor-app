@@ -2,30 +2,51 @@
 let donors = [];
 let filteredDonors = donors.slice();
 let isOnline = false;
+const STORAGE_KEY = 'blood-donor-app.donors';
 
-// تحميل البيانات من الخادم عند بدء التطبيق
+function readLocalDonors() {
+  try {
+    const value = localStorage.getItem(STORAGE_KEY);
+    return value ? JSON.parse(value) : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function persistLocalDonors() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(donors));
+}
+
+// تحميل البيانات من الخادم عند بدء التطبيق، مع حفظ محلي كنسخة احتياطية
 async function loadDonorsFromServer() {
+  const localDonors = readLocalDonors();
+  donors = Array.isArray(localDonors) ? localDonors : [];
+
   try {
     const response = await fetch(API_URL);
     if (response.ok) {
       const data = await response.json();
-      donors = Array.isArray(data) ? data : [];
+      const remoteDonors = Array.isArray(data) ? data : [];
+      donors = remoteDonors.length > 0 ? remoteDonors : donors;
       isOnline = true;
       console.log('✓ تم تحميل البيانات من الخادم');
     } else {
       throw new Error('فشل تحميل البيانات');
     }
   } catch (error) {
-    console.warn('⚠️ الخادم غير متاح أو غير مُعدّ بعد، سيتم البدء من قائمة فارغة');
-    donors = [];
+    console.warn('⚠️ الخادم غير متاح، سيتم استخدام النسخة المحفوظة في المتصفح');
     isOnline = false;
   }
+
+  persistLocalDonors();
   filteredDonors = donors.slice();
   renderTable();
 }
 
-// دالة لحفظ البيانات في الخادم المشترك
+// دالة لحفظ البيانات في المتصفح والخادم المشترك
 async function saveDonors() {
+  persistLocalDonors();
+
   try {
     const response = await fetch(API_URL, { method: 'GET' });
     if (!response.ok) {
@@ -45,7 +66,7 @@ async function saveDonors() {
     console.log('✓ تم الحفظ في الخادم المشترك');
   } catch (error) {
     isOnline = false;
-    console.warn('⚠️ خطأ في الحفظ:', error);
+    console.warn('⚠️ خطأ في الحفظ، لكن البيانات محفوظة محلياً:', error);
   }
 }
 

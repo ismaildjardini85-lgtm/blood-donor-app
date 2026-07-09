@@ -9,6 +9,14 @@ function normalizeDonors(data) {
   return data.filter((item) => item && typeof item === 'object' && !Array.isArray(item));
 }
 
+function mergeDonors(localDonors, remoteDonors) {
+  const remote = normalizeDonors(remoteDonors);
+  if (remote.length > 0) {
+    return remote;
+  }
+  return normalizeDonors(localDonors);
+}
+
 function buildFilePayload(donors) {
   return JSON.stringify({ donors: normalizeDonors(donors) }, null, 2);
 }
@@ -94,6 +102,7 @@ async function syncToGitHub(donors, options = {}) {
 module.exports = {
   buildFilePayload,
   getStoragePath,
+  mergeDonors,
   normalizeDonors,
   readStorageFile,
   syncToGitHub,
